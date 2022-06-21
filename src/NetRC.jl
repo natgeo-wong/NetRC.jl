@@ -25,15 +25,16 @@ function netrc_read()
 
     if netrc_check()
 
-        data = readdlm(netrc_file(),' ')
+        @info "$(modulelog()) - Reading data from .netrc file at $(netrc_file()) into Dict ..."
 
+        data = readdlm(netrc_file(),' ')
         netrc["machine"]  = data[:,2]
         netrc["login"]    = data[:,4]
         netrc["password"] = data[:,6]
 
     else
 
-        @warn "$(modulelog()) - .netrc file at $(netrc_file()) does not exist, creating ..."
+        @info "$(modulelog()) - A .netrc file at $(netrc_file()) does not exist, creating Dict from scratch ..."
 
         netrc["machine"]  = Vector{String}(undef)
         netrc["login"]    = Vector{String}(undef)
@@ -48,6 +49,8 @@ end
 function netrc_write(
     netrc :: Dict
 )
+
+    @info "$(modulelog()) - Writing data from Dict into .netrc file at $(netrc_file()) ..."
 
     nserver = length(netrc["machine"])
     open(netrc_file(),"w") do f
@@ -71,6 +74,7 @@ function netrc_add!(
 
     imach = netrc["machine"] .== machine
     if iszero(sum(imach))
+        @info "$(modulelog()) - Adding login and password for new machine $machine ..."
         netrc["machine"]  = vcat(netrc["machine"], machine)
         netrc["login"]    = vcat(netrc["login"],   login)
         netrc["password"] = vcat(netrc["password"],password)
@@ -90,8 +94,16 @@ function netrc_modify!(
 )
 
     imach = findfirst(netrc["machine"] .== machine)
-    if login != "";    netrc["login"][imach]    = login    end
-    if password != ""; netrc["password"][imach] = password end
+
+    if login != ""
+        @info "$(modulelog()) - Modifying login information for machine $machine ..."
+        netrc["login"][imach] = login
+    end
+
+    if password != ""
+        @info "$(modulelog()) - Modifying password information for machine $machine ..."
+        netrc["password"][imach] = password
+    end
 
     return
 
@@ -103,7 +115,8 @@ function netrc_rm!(
 )
 
     imach = netrc["machine"] .!= machine
-    if sum(imach) < length(netrc["machine"])
+    if netrc_checkmachine(netrc,machine=machine)
+        @info "$(modulelog()) - Removing login and password information for machine $machine ..."
         netrc["machine"]  = netrc["machine"][imach]
         netrc["login"]    = netrc["login"][imach]
         netrc["password"] = netrc["password"][imach]
