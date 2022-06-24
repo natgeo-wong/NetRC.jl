@@ -19,13 +19,17 @@ modulelog() = "$(now()) - NetRC.jl"
 netrc_file()  = joinpath(homedir(),".netrc")
 netrc_check() = isfile(netrc_file())
 
-function netrc_read()
+function netrc_read(;
+    logging :: Bool = true
+)
 
     netrc = Dict{String,Vector{String}}()
 
     if netrc_check()
-
-        @info "$(modulelog()) - Reading data from .netrc file at $(netrc_file()) into Dict ..."
+        
+        if logging
+            @info "$(modulelog()) - Reading data from .netrc file at $(netrc_file()) into Dict ..."
+        end
 
         data = readdlm(netrc_file(),' ')
         netrc["machine"]  = data[:,2]
@@ -33,8 +37,10 @@ function netrc_read()
         netrc["password"] = data[:,6]
 
     else
-
-        @info "$(modulelog()) - A .netrc file at $(netrc_file()) does not exist, creating Dict from scratch ..."
+        
+        if logging
+            @info "$(modulelog()) - A .netrc file at $(netrc_file()) does not exist, creating Dict from scratch ..."
+        end
 
         netrc["machine"]  = Vector{String}(undef)
         netrc["login"]    = Vector{String}(undef)
