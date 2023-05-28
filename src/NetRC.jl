@@ -42,9 +42,9 @@ function netrc_read(;
             @info "$(modulelog()) - A .netrc file at $(netrc_file()) does not exist, creating Dict from scratch ..."
         end
 
-        netrc["machine"]  = Vector{String}(undef)
-        netrc["login"]    = Vector{String}(undef)
-        netrc["password"] = Vector{String}(undef)
+        netrc["machine"]  = Vector{String}(undef,0)
+        netrc["login"]    = Vector{String}(undef,0)
+        netrc["password"] = Vector{String}(undef,0)
 
     end
 
